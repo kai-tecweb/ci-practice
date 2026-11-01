@@ -15,8 +15,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: ruff check .
+      - id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+      - if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+      - run: .venv/bin/ruff check .
 
   typecheck:
     runs-on: ubuntu-latest
@@ -27,8 +33,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: mypy . --ignore-missing-imports
+      - id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+      - if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+      - run: .venv/bin/mypy . --ignore-missing-imports
 
   test:
     runs-on: ubuntu-latest
@@ -39,5 +51,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
-      - run: pytest -v test_calc_add_sub.py test_calc_multiply.py test_calc_divide.py test_calc_parity.py test_calc_factorial_average.py
+      - id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+      - if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: python -m venv .venv && .venv/bin/pip install -r requirements.txt
+      - run: .venv/bin/pytest -v test_calc_add_sub.py test_calc_multiply.py test_calc_divide.py test_calc_parity.py test_calc_factorial_average.py
